@@ -35,6 +35,23 @@ app.post('/api/blogs', async (req, res) => {
   }
 })
 
+// DELETE a blog by id
+app.delete('/api/blogs/:id', async (req, res) => {
+  try {
+    const { id } = req.params
+    const result = await pool.query('DELETE FROM blogs WHERE id = $1 RETURNING *', [id])
+    
+    if (result.rowCount === 0) {
+      return res.status(404).json({ error: 'Blog not found' })
+    }
+    
+    res.status(204).end()
+  } catch (err) {
+    console.error(err)
+    res.status(500).json({ error: 'Internal server error' })
+  }
+})
+
 const PORT = process.env.PORT || 3001
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`)

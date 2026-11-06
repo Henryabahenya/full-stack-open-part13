@@ -20,6 +20,7 @@
     "sequelize": "^6.37.8"
   },
   "devDependencies": {
+    "axios": "^1.12.2",
     "nodemon": "^3.1.14"
   }
 }

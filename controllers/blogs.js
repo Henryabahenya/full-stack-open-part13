@@ -1,17 +1,16 @@
 const router = require('express').Router()
 const { pool } = require('../utils/db')
 
-router.get('/', async (req, res) => {
+router.get('/', async (req, res, next) => {
   try {
     const result = await pool.query('SELECT * FROM blogs')
     res.json(result.rows)
   } catch (err) {
-    console.error(err)
-    res.status(500).json({ error: 'Internal server error' })
+    next(err)
   }
 })
 
-router.post('/', async (req, res) => {
+router.post('/', async (req, res, next) => {
   try {
     const { author, url, title, likes } = req.body
     const result = await pool.query(
@@ -20,12 +19,11 @@ router.post('/', async (req, res) => {
     )
     res.status(201).json(result.rows[0])
   } catch (err) {
-    console.error(err)
-    res.status(500).json({ error: 'Internal server error' })
+    next(err)
   }
 })
 
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', async (req, res, next) => {
   try {
     const { id } = req.params
     const result = await pool.query('DELETE FROM blogs WHERE id = $1 RETURNING *', [id])
@@ -36,12 +34,11 @@ router.delete('/:id', async (req, res) => {
     
     res.status(204).end()
   } catch (err) {
-    console.error(err)
-    res.status(500).json({ error: 'Internal server error' })
+    next(err)
   }
 })
 
-router.put('/:id', async (req, res) => {
+router.put('/:id', async (req, res, next) => {
   try {
     const { id } = req.params
     const { likes } = req.body
@@ -57,8 +54,7 @@ router.put('/:id', async (req, res) => {
 
     res.json(result.rows[0])
   } catch (err) {
-    console.error(err)
-    res.status(500).json({ error: 'Internal server error' })
+    next(err)
   }
 })
 

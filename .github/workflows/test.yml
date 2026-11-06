@@ -48,13 +48,17 @@ jobs:
         run: |
           node -e '
             const http = require("http");
+            let retries = 30;
             const check = () => {
               http.get("http://localhost:3001", (res) => {
-                if (res.statusCode) {
-                  console.log("Server is ready!");
-                  process.exit(0);
+                console.log("Server is ready!");
+                process.exit(0);
+              }).on("error", (err) => {
+                retries--;
+                if (retries <= 0) {
+                  console.error("Error: Timeout waiting for application to start.");
+                  process.exit(1);
                 }
-              }).on("error", () => {
                 setTimeout(check, 1000);
               });
             };

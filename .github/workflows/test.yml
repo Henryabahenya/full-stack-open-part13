@@ -45,7 +45,21 @@ jobs:
           TESTING: true
           
       - name: Wait for application to be ready
-        run: npx wait-on http://localhost:3001 -t 30000
+        run: |
+          node -e '
+            const http = require("http");
+            const check = () => {
+              http.get("http://localhost:3001", (res) => {
+                if (res.statusCode) {
+                  console.log("Server is ready!");
+                  process.exit(0);
+                }
+              }).on("error", () => {
+                setTimeout(check, 1000);
+              });
+            };
+            check();
+          '
         
       - name: Run tests
         run: npm test

@@ -1,5 +1,6 @@
 const router = require('express').Router()
 const { Blog, User } = require('../models')
+const { Op } = require('sequelize')
 const jwt = require('jsonwebtoken')
 const { SECRET } = require('../utils/config')
 
@@ -19,7 +20,17 @@ const tokenExtractor = (req, res, next) => {
 
 router.get('/', async (req, res, next) => {
   try {
+    let where = {}
+    if (req.query.search) {
+      where = {
+        title: {
+          [Op.iLike]: `%${req.query.search}%`
+        }
+      }
+    }
+
     const blogs = await Blog.findAll({
+      where,
       include: {
         model: User,
         attributes: ['username', 'name']
@@ -77,5 +88,4 @@ router.put('/:id', async (req, res, next) => {
   }
 })
 
-router.module = router
 module.exports = router

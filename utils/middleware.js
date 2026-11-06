@@ -1,7 +1,10 @@
 const errorHandler = (err, req, res, next) => {
   console.error(err.message)
 
-  // You can customize handling for specific database or validation errors here if needed
+  if (err.name === 'SequelizeValidationError' || err.name === 'SequelizeUniqueConstraintError') {
+    return res.status(400).json({ error: err.errors.map(e => e.message) })
+  }
+
   res.status(400).json({ error: err.message })
 }
 

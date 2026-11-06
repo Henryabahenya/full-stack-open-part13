@@ -44,10 +44,11 @@ jobs:
           SECRET: test_secret
           TESTING: true
           
-      - name: Wait for application to be ready
+      - name: Wait for application to be ready and check logs on failure
         run: |
           node -e '
             const http = require("http");
+            const fs = require("fs");
             let retries = 30;
             const check = () => {
               http.get("http://localhost:3001", (res) => {
@@ -56,7 +57,12 @@ jobs:
               }).on("error", (err) => {
                 retries--;
                 if (retries <= 0) {
-                  console.error("Error: Timeout waiting for application to start.");
+                  console.error("Timeout waiting for application to start.");
+                  if (fs.existsSync("app.log")) {
+                    console.log("--- APP LOG START ---");
+                    console.log(fs.readFileSync("app.log", "utf8"));
+                    console.log("--- APP LOG END ---");
+                  }
                   process.exit(1);
                 }
                 setTimeout(check, 1000);
@@ -72,10 +78,6 @@ jobs:
           SECRET: test_secret
           TESTING: true
 
-      - name: Print application logs on failure
-        if: failure()
-        run: cat app.log
-        
       - name: Stop application
         if: always()
         run: pkill -f "node index.js" || true

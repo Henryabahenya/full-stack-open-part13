@@ -1,14 +1,16 @@
-const { Pool } = require('pg')
+const Sequelize = require('sequelize')
 const { DATABASE_URL } = require('./config')
 
-const pool = new Pool({
-  connectionString: DATABASE_URL,
+const sequelize = new Sequelize(DATABASE_URL, {
+  dialectOptions: {
+    // add any ssl or specific options if needed
+  },
 })
 
 const connectToDatabase = async () => {
   try {
-    await pool.query('SELECT 1')
-    console.log('Connected to the database successfully')
+    await sequelize.authenticate()
+    console.log('Connected to the database with Sequelize successfully')
   } catch (err) {
     console.error('Failed to connect to the database', err)
     process.exit(1)
@@ -16,6 +18,6 @@ const connectToDatabase = async () => {
 }
 
 module.exports = {
-  pool,
+  sequelize,
   connectToDatabase
 }

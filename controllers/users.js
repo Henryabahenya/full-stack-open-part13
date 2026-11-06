@@ -1,9 +1,14 @@
 const router = require('express').Router()
-const User = require('../models/user')
+const { User, Blog } = require('../models')
 
 router.get('/', async (req, res, next) => {
   try {
-    const users = await User.findAll()
+    const users = await User.findAll({
+      include: {
+        model: Blog,
+        attributes: { exclude: ['userId'] }
+      }
+    })
     res.json(users)
   } catch (err) {
     next(err)
@@ -12,25 +17,8 @@ router.get('/', async (req, res, next) => {
 
 router.post('/', async (req, res, next) => {
   try {
-    // password can be ignored even if sent in request body
-    const { username, name } = req.body
-    const user = await User.create({ username, name })
-    res.status(201).json(user)
-  } catch (err) {
-    next(err)
-  }
-})
-
-router.put('/:username', async (req, res, next) => {
-  try {
-    const user = await User.findOne({ where: { username: req.params.username } })
-    if (user) {
-      user.name = req.body.name
-      await user.save() // ensures updatedAt timestamp updates correctly
-      res.json(user)
-    } else {
-      res.status(404).json({ error: 'User not found' })
-    }
+    const user = await User.create(req.body)
+    res.json(user)
   } catch (err) {
     next(err)
   }
@@ -38,7 +26,12 @@ router.put('/:username', async (req, res, next) => {
 
 router.get('/:id', async (req, res, next) => {
   try {
-    const user = await User.findByPk(req.params.id)
+    const user = await User.findByPk(req.params.id, {
+      include: {
+        model: Blog,
+        attributes: { exclude: ['userId'] }
+      }
+    })
     if (user) {
       res.json(user)
     } else {

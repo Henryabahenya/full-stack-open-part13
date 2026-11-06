@@ -51,8 +51,8 @@ router.delete('/:id', tokenExtractor, async (req, res, next) => {
       return res.status(404).json({ error: 'Blog not found' })
     }
 
-    if (blog.userId && blog.userId !== req.decodedToken.id) {
-      return res.status(403).json({ error: 'Unauthorized to delete this blog' })
+    if (blog.userId !== req.decodedToken.id) {
+      return res.status(403).json({ error: 'Only the creator can delete this blog' })
     }
 
     await blog.destroy()
@@ -77,4 +77,5 @@ router.put('/:id', async (req, res, next) => {
   }
 })
 
+router.module = router
 module.exports = router

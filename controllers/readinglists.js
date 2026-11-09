@@ -66,7 +66,9 @@ router.put("/:id", tokenExtractor, async (req, res, next) => {
     }
 
     if (readingListEntry.userId !== req.decodedToken.id) {
-      return res.status(403).json({ error: "Only the owner can update this reading list entry" });
+      return res
+        .status(403)
+        .json({ error: "Only the owner can update this reading list entry" });
     }
 
     readingListEntry.read = read;

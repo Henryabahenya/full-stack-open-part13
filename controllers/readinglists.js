@@ -1,5 +1,22 @@
 const router = require("express").Router();
+const jwt = require("jsonwebtoken");
+const { SECRET } = require("../utils/config");
 const { User, Blog, ReadingList } = require("../models");
+
+const tokenExtractor = (req, res, next) => {
+  const authorization = req.get("authorization");
+
+  if (!authorization || !authorization.toLowerCase().startsWith("bearer ")) {
+    return res.status(401).json({ error: "token missing" });
+  }
+
+  try {
+    req.decodedToken = jwt.verify(authorization.substring(7), SECRET);
+    next();
+  } catch {
+    return res.status(401).json({ error: "token invalid" });
+  }
+};
 
 router.post("/", async (req, res, next) => {
   try {
@@ -34,6 +51,28 @@ router.post("/", async (req, res, next) => {
       read: false,
     });
     res.status(201).json(readingListEntry);
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.put("/:id", tokenExtractor, async (req, res, next) => {
+  try {
+    const { read } = req.body;
+    const readingListEntry = await ReadingList.findByPk(req.params.id);
+
+    if (!readingListEntry) {
+      return res.status(404).json({ error: "Reading list entry not found" });
+    }
+
+    if (readingListEntry.userId !== req.decodedToken.id) {
+      return res.status(403).json({ error: "Only the owner can update this reading list entry" });
+    }
+
+    readingListEntry.read = read;
+    await readingListEntry.save();
+
+    res.json(readingListEntry);
   } catch (err) {
     next(err);
   }

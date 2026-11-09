@@ -4,10 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "TESTING=true node --test --test-concurrency=1 tests/api_ch3.test.js",
+    "test": "TESTING=true node --test --test-concurrency=1",
     "start": "node index.js",
     "dev": "nodemon index.js",
-    "start:test": "TESTING=true node index.js"
+    "start:test": "NODE_ENV=test TESTING=true node index.js"
   },
   "keywords": [],
   "author": "",

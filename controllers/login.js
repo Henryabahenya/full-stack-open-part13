@@ -10,10 +10,21 @@ router.post("/", async (request, response) => {
     where: { username },
   });
 
-  if (!user || user.disabled || password !== "secret") {
+  if (!user || user.disabled) {
     return response.status(401).json({
       error: "invalid username or password",
     });
+  }
+
+  if (user.passwordHash) {
+    const bcrypt = require("bcrypt");
+    const passwordCorrect = await bcrypt.compare(password, user.passwordHash);
+
+    if (!passwordCorrect) {
+      return response.status(401).json({
+        error: "invalid username or password",
+      });
+    }
   }
 
   const userForToken = {
@@ -26,7 +37,7 @@ router.post("/", async (request, response) => {
 
   response
     .status(200)
-    .send({ token, username: user.username, name: user.name });
+    .json({ token, username: user.username, name: user.name });
 });
 
 module.exports = router;

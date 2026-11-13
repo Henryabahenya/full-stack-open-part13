@@ -2,7 +2,8 @@ const Sequelize = require("sequelize");
 const { Umzug, SequelizeStorage } = require("umzug");
 const { DATABASE_URL, TEST_DATABASE_URL } = require("./config");
 
-const isTesting = process.env.TESTING === "true";
+const isTesting =
+  process.env.TESTING === "true" || process.env.NODE_ENV === "test";
 const databaseUrl = isTesting ? TEST_DATABASE_URL : DATABASE_URL;
 
 if (!databaseUrl) {
